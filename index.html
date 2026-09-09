@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>amazon.in | Everything you need, delivered</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <header class="site-header">
+        <div class="topbar">
+            <button class="menu-toggle" id="menuToggle" aria-label="Open menu">☰</button>
+            <a class="logo" href="#" aria-label="Amazon home"><span>amazon</span><small>.in</small><i></i></a>
+            <button class="location" id="locationButton"><span class="pin">⌖</span><span>Deliver to<br><b>Aligarh
+                        202001</b></span></button>
+            <form class="search-box" id="searchForm"><select id="categorySelect" aria-label="Search category">
+                    <option value="All">All</option>
+                    <option value="Electronics">Electronics</option>
+                    <option value="Fashion">Fashion</option>
+                    <option value="Home">Home</option>
+                    <option value="Beauty">Beauty</option>
+                </select><input type="search" id="searchInput" placeholder="Search Amazon.in" autocomplete="off"><button
+                    type="submit" aria-label="Search">⌕</button></form>
+            <button class="language">EN <span>⌄</span></button><a class="account" href="#"><span>Hello, sign
+                    in</span><b>Account & Lists <em>⌄</em></b></a><a class="orders" href="#"><span>Returns</span><b>&
+                    Orders</b></a><button class="cart" id="cartButton" aria-label="Shopping cart"><span
+                    class="cart-icon">🛒</span><strong id="cartCount">0</strong><b>Cart</b></button>
+        </div>
+        <nav class="subnav" id="subnav"><a href="#" class="all-link">☰ &nbsp;All</a><a href="#deals">Today's Deals</a><a
+                href="#products">Fresh</a><a href="#products">Mobiles</a><a href="#products">Gift Cards</a><a
+                href="#products">Fashion</a><a href="#products">Customer Service</a><a href="#products">Sell</a></nav>
+    </header>
+    <main>
+        <section class="hero">
+            <div class="hero-copy">
+                <p class="eyebrow">THE EVERYDAY EDIT</p>
+                <h1>Small joys.<br><span>Big delivery.</span></h1>
+                <p>Fresh finds for every corner of your life, delivered with a little more delight.</p><a
+                    class="primary-button" href="#products">Shop today’s picks <span>→</span></a>
+            </div>
+            <div class="hero-art">
+                <div class="sun"></div><img
+                    src="https://images.unsplash.com/photo-1607082349566-187342175e2f?auto=format&fit=crop&w=1000&q=85"
+                    alt="Colorful shopping packages and gifts">
+                <div class="delivery-note">Free delivery<br><b>on orders over ₹499</b></div>
+            </div>
+            <div class="hero-dots"><span class="active"></span><span></span><span></span></div>
+        </section>
+        <section class="category-strip" id="deals">
+            <div class="section-heading">
+                <div>
+                    <p class="eyebrow">BROWSE BY MOOD</p>
+                    <h2>What are you shopping for?</h2>
+                </div><a href="#products">Explore all <span>→</span></a>
+            </div>
+            <div class="category-grid"><button data-category="Electronics"><span
+                        class="category-icon coral">◉</span><b>Tech & gadgets</b><small>Smart picks for
+                        less</small></button><button data-category="Fashion"><span
+                        class="category-icon blue">◇</span><b>Style refresh</b><small>Looks you’ll
+                        love</small></button><button data-category="Home"><span
+                        class="category-icon yellow">⌂</span><b>Home upgrades</b><small>Make space
+                        yours</small></button><button data-category="Beauty"><span
+                        class="category-icon green">✦</span><b>Beauty shelf</b><small>Feel-good
+                        essentials</small></button></div>
+        </section>
+        <section class="products-section" id="products">
+            <div class="section-heading">
+                <div>
+                    <p class="eyebrow">JUST FOR YOU</p>
+                    <h2 id="productHeading">Popular right now</h2>
+                </div><button class="view-all" id="clearFilter">View all <span>→</span></button>
+            </div>
+            <div class="product-grid" id="productGrid"></div>
+            <p class="empty-state" id="emptyState">No products matched that search. Try another word.</p>
+        </section>
+        <section class="feature-band">
+            <div>
+                <p class="eyebrow">MADE FOR YOUR ROUTINE</p>
+                <h2>Good things,<br><span>right on time.</span></h2>
+                <p>From morning coffee to midnight scrolls, find the little upgrades that make the day yours.</p><a
+                    href="#products">Discover more <span>→</span></a>
+            </div><img
+                src="https://images.unsplash.com/photo-1494438639946-1ebd1d20bf85?auto=format&fit=crop&w=1000&q=85"
+                alt="Warmly styled home desk with daily essentials">
+        </section>
+    </main>
+    <div class="toast" id="toast" role="status"></div>
+    <div class="cart-drawer" id="cartDrawer">
+        <div class="drawer-head">
+            <h2>Your cart</h2><button id="closeCart" aria-label="Close cart">×</button>
+        </div>
+        <div id="cartItems"></div>
+        <div class="cart-total"><span>Subtotal</span><strong id="cartTotal">₹0</strong></div><button
+            class="checkout-button">Proceed to checkout</button>
+    </div>
+    <div class="overlay" id="overlay"></div>
+    <script src="script.js"></script>
+</body>
+
+</html>
