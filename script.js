@@ -15,11 +15,13 @@ const emptyState = document.getElementById('emptyState');
 const toast = document.getElementById('toast');
 
 function renderProducts(list = products) {
-    grid.innerHTML = list.map(product => `<article class="product-card"><div class="product-image">${product.badge ? `<span class="badge">${product.badge}</span>` : ''}<img src="${product.image}" alt="${product.name}" loading="lazy"></div><div class="product-info"><h3>${product.name}</h3><div class="rating">★★★★★ <span>${product.rating} · ${product.reviews}</span></div><p class="price"><small>₹</small>${product.price.toLocaleString('en-IN')}</p><button class="add-button" data-id="${product.id}">Add to cart</button></div></article>`).join('');
+    grid.innerHTML = list.map(product => `<article class="product-card"><div class="product-image">${product.badge ? `<span class="badge">${product.badge}</span>` : ''}<img src="${product.image}" alt="${product.name}" loading="lazy"></div><div class="product-info"><h3>${product.name}</h3><div class="rating">★★★★★ <span>${product.rating} · ${product.reviews}</span></div><p class="price"><small>₹</small>${product.price.toLocaleString('en-IN')}</p><div class="product-actions"><button class="add-button" data-id="${product.id}">Add to cart</button><button class="buy-button" data-id="${product.id}">Buy now</button></div></div></article>`).join('');
     emptyState.style.display = list.length ? 'none' : 'block';
 }
 function showToast(message) { toast.textContent = message; toast.classList.add('show'); setTimeout(() => toast.classList.remove('show'), 2200); }
 function updateCart() { document.getElementById('cartCount').textContent = cart.length; document.getElementById('cartTotal').textContent = `₹${cart.reduce((sum, item) => sum + item.price, 0).toLocaleString('en-IN')}`; document.getElementById('cartItems').innerHTML = cart.length ? cart.map(item => `<div class="cart-line"><img src="${item.image}" alt=""><div><b>${item.name}</b><span>₹${item.price.toLocaleString('en-IN')}</span></div></div>`).join('') : '<p class="empty-state" style="display:block">Your cart is waiting for something good.</p>'; }
+function openCart() { document.getElementById('cartDrawer').classList.add('open'); document.getElementById('overlay').classList.add('show'); }
+function buyNow(product) { cart = [product]; updateCart(); openCart(); showToast(`${product.name} is ready to buy`); }
 function filterProducts() { const query = document.getElementById('searchInput').value.toLowerCase().trim(); const category = document.getElementById('categorySelect').value; const filtered = products.filter(product => (category === 'All' || product.category === category) && (!query || `${product.name} ${product.category}`.toLowerCase().includes(query))); heading.textContent = query || category !== 'All' ? `Results for ${query || category}` : 'Popular right now'; renderProducts(filtered); document.getElementById('products').scrollIntoView({ behavior: 'smooth' }); }
 
 renderProducts(); updateCart();
@@ -27,9 +29,10 @@ document.getElementById('searchForm').addEventListener('submit', event => { even
 document.getElementById('categorySelect').addEventListener('change', filterProducts);
 document.getElementById('clearFilter').addEventListener('click', () => { document.getElementById('searchInput').value = ''; document.getElementById('categorySelect').value = 'All'; heading.textContent = 'Popular right now'; renderProducts(); });
 document.querySelectorAll('.category-grid button').forEach(button => button.addEventListener('click', () => { document.getElementById('categorySelect').value = button.dataset.category; filterProducts(); }));
-grid.addEventListener('click', event => { if (!event.target.matches('.add-button')) return; const product = products.find(item => item.id === Number(event.target.dataset.id)); cart.push(product); updateCart(); showToast(`${product.name} added to cart`); });
-document.getElementById('cartButton').addEventListener('click', () => { document.getElementById('cartDrawer').classList.add('open'); document.getElementById('overlay').classList.add('show'); });
+grid.addEventListener('click', event => { const product = products.find(item => item.id === Number(event.target.dataset.id)); if (!product) return; if (event.target.matches('.add-button')) { cart.push(product); updateCart(); showToast(`${product.name} added to cart`); } if (event.target.matches('.buy-button')) buyNow(product); });
+document.getElementById('cartButton').addEventListener('click', openCart);
 function closeCart() { document.getElementById('cartDrawer').classList.remove('open'); document.getElementById('overlay').classList.remove('show'); }
 document.getElementById('closeCart').addEventListener('click', closeCart); document.getElementById('overlay').addEventListener('click', closeCart);
+document.querySelector('.checkout-button').addEventListener('click', () => { if (!cart.length) { showToast('Your cart is empty'); return; } showToast('Checkout is ready for the next step'); });
 document.getElementById('menuToggle').addEventListener('click', () => document.getElementById('subnav').classList.toggle('mobile-open'));
 document.getElementById('locationButton').addEventListener('click', () => showToast('Delivery location: Aligarh 202001'));

@@ -512,6 +512,24 @@
      font-weight: 600
  }
 
+ .product-actions {
+     display: grid;
+     gap: 8px
+ }
+
+ .buy-button {
+     width: 100%;
+     padding: 10px;
+     border-radius: 20px;
+     background: var(--navy);
+     color: #fff;
+     font-weight: 600
+ }
+
+ .buy-button:hover {
+     background: #194355
+ }
+
  .add-button:hover {
      background: #ffca3d
  }
@@ -809,6 +827,10 @@
      }
 
      .add-button {
+         font-size: 12px
+     }
+
+     .buy-button {
          font-size: 12px
      }
 
