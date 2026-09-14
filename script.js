@@ -14,6 +14,7 @@ const heading = document.getElementById('productHeading');
 const emptyState = document.getElementById('emptyState');
 const toast = document.getElementById('toast');
 
+
 function renderProducts(list = products) {
     grid.innerHTML = list.map(product => `<article class="product-card"><div class="product-image">${product.badge ? `<span class="badge">${product.badge}</span>` : ''}<img src="${product.image}" alt="${product.name}" loading="lazy"></div><div class="product-info"><h3>${product.name}</h3><div class="rating">★★★★★ <span>${product.rating} · ${product.reviews}</span></div><p class="price"><small>₹</small>${product.price.toLocaleString('en-IN')}</p><div class="product-actions"><button class="add-button" data-id="${product.id}">Add to cart</button><button class="buy-button" data-id="${product.id}">Buy now</button></div></div></article>`).join('');
     emptyState.style.display = list.length ? 'none' : 'block';
