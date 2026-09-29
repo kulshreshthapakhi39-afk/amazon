@@ -1,39 +1,168 @@
-const products = [
-    { id: 1, name: 'Noise ColorFit Pulse Smart Watch', category: 'Electronics', price: 1599, rating: '4.3', reviews: '12,842', badge: 'Bestseller', image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=600&q=80' },
-    { id: 2, name: 'Minimal ceramic coffee cup set', category: 'Home', price: 699, rating: '4.6', reviews: '3,216', badge: 'Popular', image: 'https://images.unsplash.com/photo-1514228742587-6b1558fcca3d?auto=format&fit=crop&w=600&q=80' },
-    { id: 3, name: 'Everyday canvas sneakers', category: 'Fashion', price: 1299, rating: '4.2', reviews: '8,091', badge: '', image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=600&q=80' },
-    { id: 4, name: 'Vitamin C brightening face serum', category: 'Beauty', price: 449, rating: '4.5', reviews: '5,740', badge: 'Deal', image: 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=600&q=80' },
-    { id: 5, name: 'Portable wireless speaker', category: 'Electronics', price: 2199, rating: '4.4', reviews: '1,908', badge: '', image: 'https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?auto=format&fit=crop&w=600&q=80' },
-    { id: 6, name: 'Soft cotton cushion cover', category: 'Home', price: 349, rating: '4.1', reviews: '2,404', badge: '', image: 'https://images.unsplash.com/photo-1584100936595-c0654b55a2e2?auto=format&fit=crop&w=600&q=80' },
-    { id: 7, name: 'Relaxed fit linen shirt', category: 'Fashion', price: 899, rating: '4.3', reviews: '4,102', badge: 'New', image: 'https://images.unsplash.com/photo-1603252110481-7ba873bf42ab?auto=format&fit=crop&w=600&q=80' },
-    { id: 8, name: 'Hydrating lip balm trio', category: 'Beauty', price: 299, rating: '4.7', reviews: '6,680', badge: '', image: 'https://images.unsplash.com/photo-1586495777744-4413f21062fa?auto=format&fit=crop&w=600&q=80' }
-];
-let cart = [];
 const grid = document.getElementById('productGrid');
 const heading = document.getElementById('productHeading');
 const emptyState = document.getElementById('emptyState');
 const toast = document.getElementById('toast');
 
+async function apiRequest(url, options = {}) {
+    const response = await fetch(url, {
+        ...options,
+        headers: { ...(options.body ? { 'Content-Type': 'application/json' } : {}), ...options.headers }
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || 'Something went wrong');
+    return data;
+}
 
-function renderProducts(list = products) {
+function renderProducts(list) {
     grid.innerHTML = list.map(product => `<article class="product-card"><div class="product-image">${product.badge ? `<span class="badge">${product.badge}</span>` : ''}<img src="${product.image}" alt="${product.name}" loading="lazy"></div><div class="product-info"><h3>${product.name}</h3><div class="rating">★★★★★ <span>${product.rating} · ${product.reviews}</span></div><p class="price"><small>₹</small>${product.price.toLocaleString('en-IN')}</p><div class="product-actions"><button class="add-button" data-id="${product.id}">Add to cart</button><button class="buy-button" data-id="${product.id}">Buy now</button></div></div></article>`).join('');
     emptyState.style.display = list.length ? 'none' : 'block';
 }
-function showToast(message) { toast.textContent = message; toast.classList.add('show'); setTimeout(() => toast.classList.remove('show'), 2200); }
-function updateCart() { document.getElementById('cartCount').textContent = cart.length; document.getElementById('cartTotal').textContent = `₹${cart.reduce((sum, item) => sum + item.price, 0).toLocaleString('en-IN')}`; document.getElementById('cartItems').innerHTML = cart.length ? cart.map(item => `<div class="cart-line"><img src="${item.image}" alt=""><div><b>${item.name}</b><span>₹${item.price.toLocaleString('en-IN')}</span></div></div>`).join('') : '<p class="empty-state" style="display:block">Your cart is waiting for something good.</p>'; }
-function openCart() { document.getElementById('cartDrawer').classList.add('open'); document.getElementById('overlay').classList.add('show'); }
-function buyNow(product) { cart = [product]; updateCart(); openCart(); showToast(`${product.name} is ready to buy`); }
-function filterProducts() { const query = document.getElementById('searchInput').value.toLowerCase().trim(); const category = document.getElementById('categorySelect').value; const filtered = products.filter(product => (category === 'All' || product.category === category) && (!query || `${product.name} ${product.category}`.toLowerCase().includes(query))); heading.textContent = query || category !== 'All' ? `Results for ${query || category}` : 'Popular right now'; renderProducts(filtered); document.getElementById('products').scrollIntoView({ behavior: 'smooth' }); }
+let cartSummary = { items: [], count: 0, subtotal: 0 };
+let toastTimer;
 
-renderProducts(); updateCart();
-document.getElementById('searchForm').addEventListener('submit', event => { event.preventDefault(); filterProducts(); });
-document.getElementById('categorySelect').addEventListener('change', filterProducts);
-document.getElementById('clearFilter').addEventListener('click', () => { document.getElementById('searchInput').value = ''; document.getElementById('categorySelect').value = 'All'; heading.textContent = 'Popular right now'; renderProducts(); });
-document.querySelectorAll('.category-grid button').forEach(button => button.addEventListener('click', () => { document.getElementById('categorySelect').value = button.dataset.category; filterProducts(); }));
-grid.addEventListener('click', event => { const product = products.find(item => item.id === Number(event.target.dataset.id)); if (!product) return; if (event.target.matches('.add-button')) { cart.push(product); updateCart(); showToast(`${product.name} added to cart`); } if (event.target.matches('.buy-button')) buyNow(product); });
+function showToast(message) {
+    toast.textContent = message;
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove('show'), 3200);
+}
+
+function updateCart(summary) {
+    cartSummary = summary;
+    document.getElementById('cartCount').textContent = summary.count;
+    document.getElementById('cartTotal').textContent = `₹${summary.subtotal.toLocaleString('en-IN')}`;
+    document.querySelector('.checkout-button').disabled = summary.count === 0;
+    document.getElementById('cartItems').innerHTML = summary.items.length ? summary.items.map(item => `
+        <div class="cart-line">
+            <img src="${item.image}" alt="">
+            <div class="cart-line-info"><b>${item.name}</b><span>₹${item.price.toLocaleString('en-IN')}</span>
+                <div class="quantity-control" aria-label="Quantity for ${item.name}">
+                    <button data-cart-action="decrease" data-id="${item.id}" aria-label="Decrease quantity">−</button>
+                    <span>${item.quantity}</span>
+                    <button data-cart-action="increase" data-id="${item.id}" aria-label="Increase quantity">+</button>
+                    <button class="remove-item" data-cart-action="remove" data-id="${item.id}">Remove</button>
+                </div>
+            </div>
+        </div>`).join('') : '<p class="cart-empty">Your cart is waiting for something good.</p>';
+}
+
+function openCart() {
+    document.getElementById('cartDrawer').classList.add('open');
+    document.getElementById('overlay').classList.add('show');
+    document.getElementById('cartButton').setAttribute('aria-expanded', 'true');
+    document.getElementById('cartDrawer').setAttribute('aria-hidden', 'false');
+    document.getElementById('closeCart').focus();
+}
+
+function closeCart() {
+    document.getElementById('cartDrawer').classList.remove('open');
+    document.getElementById('overlay').classList.remove('show');
+    document.getElementById('cartButton').setAttribute('aria-expanded', 'false');
+    document.getElementById('cartDrawer').setAttribute('aria-hidden', 'true');
+}
+
+async function filterProducts(scroll = true) {
+    const query = document.getElementById('searchInput').value.trim();
+    const category = document.getElementById('categorySelect').value;
+    const params = new URLSearchParams({ category });
+    if (query) params.set('q', query);
+    try {
+        const filtered = await apiRequest(`/api/products?${params}`);
+        heading.textContent = query || category !== 'All' ? `Results for ${query || category}` : 'Popular right now';
+        renderProducts(filtered);
+        if (scroll) document.getElementById('products').scrollIntoView({ behavior: 'smooth' });
+    } catch (error) {
+        showToast(error.message);
+    }
+}
+
+async function addToCart(productId, replace = false) {
+    try {
+        const summary = await apiRequest('/api/cart', {
+            method: 'POST',
+            body: JSON.stringify({ productId, replace })
+        });
+        updateCart(summary);
+        if (replace) openCart();
+        const product = summary.items.find(item => item.id === productId);
+        showToast(replace ? `${product.name} is ready to buy` : `${product.name} added to cart`);
+    } catch (error) {
+        showToast(error.message);
+    }
+}
+
+async function initializeStore() {
+    try {
+        const summary = await apiRequest('/api/cart');
+        const products = await apiRequest('/api/products');
+        renderProducts(products);
+        updateCart(summary);
+    } catch {
+        heading.textContent = 'Store temporarily unavailable';
+        showToast('Start the storefront server to load products');
+    }
+}
+
+document.getElementById('searchForm').addEventListener('submit', event => {
+    event.preventDefault();
+    filterProducts();
+});
+document.getElementById('categorySelect').addEventListener('change', () => filterProducts());
+document.getElementById('clearFilter').addEventListener('click', () => {
+    document.getElementById('searchInput').value = '';
+    document.getElementById('categorySelect').value = 'All';
+    filterProducts(false);
+});
+document.querySelectorAll('.category-grid button').forEach(button => button.addEventListener('click', () => {
+    document.getElementById('categorySelect').value = button.dataset.category;
+    filterProducts();
+}));
+grid.addEventListener('click', event => {
+    const button = event.target.closest('button[data-id]');
+    if (!button) return;
+    addToCart(Number(button.dataset.id), button.matches('.buy-button'));
+});
+document.getElementById('cartItems').addEventListener('click', async event => {
+    const button = event.target.closest('button[data-cart-action]');
+    if (!button) return;
+    const item = cartSummary.items.find(entry => entry.id === Number(button.dataset.id));
+    if (!item) return;
+    try {
+        if (button.dataset.cartAction === 'remove') {
+            updateCart(await apiRequest(`/api/cart/${item.id}`, { method: 'DELETE' }));
+        } else {
+            const quantity = item.quantity + (button.dataset.cartAction === 'increase' ? 1 : -1);
+            if (quantity < 1) return;
+            updateCart(await apiRequest(`/api/cart/${item.id}`, {
+                method: 'PATCH',
+                body: JSON.stringify({ quantity })
+            }));
+        }
+    } catch (error) {
+        showToast(error.message);
+    }
+});
 document.getElementById('cartButton').addEventListener('click', openCart);
-function closeCart() { document.getElementById('cartDrawer').classList.remove('open'); document.getElementById('overlay').classList.remove('show'); }
-document.getElementById('closeCart').addEventListener('click', closeCart); document.getElementById('overlay').addEventListener('click', closeCart);
-document.querySelector('.checkout-button').addEventListener('click', () => { if (!cart.length) { showToast('Your cart is empty'); return; } showToast('Checkout is ready for the next step'); });
-document.getElementById('menuToggle').addEventListener('click', () => document.getElementById('subnav').classList.toggle('mobile-open'));
+document.getElementById('closeCart').addEventListener('click', closeCart);
+document.getElementById('overlay').addEventListener('click', closeCart);
+document.addEventListener('keydown', event => {
+    if (event.key === 'Escape') closeCart();
+});
+document.querySelector('.checkout-button').addEventListener('click', async () => {
+    try {
+        const order = await apiRequest('/api/orders', { method: 'POST' });
+        updateCart({ items: [], count: 0, subtotal: 0 });
+        closeCart();
+        showToast(`Order ${order.id} placed · ₹${order.subtotal.toLocaleString('en-IN')}`);
+    } catch (error) {
+        showToast(error.message);
+    }
+});
+document.getElementById('menuToggle').addEventListener('click', event => {
+    const nav = document.getElementById('subnav');
+    const isOpen = nav.classList.toggle('mobile-open');
+    event.currentTarget.setAttribute('aria-expanded', String(isOpen));
+});
 document.getElementById('locationButton').addEventListener('click', () => showToast('Delivery location: Aligarh 202001'));
+
+initializeStore();
