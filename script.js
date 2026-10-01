@@ -18,6 +18,7 @@ function renderProducts(list) {
     emptyState.style.display = list.length ? 'none' : 'block';
 }
 
+
 let cartSummary = { items: [], count: 0, subtotal: 0 };
 let toastTimer;
 
