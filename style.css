@@ -15,11 +15,12 @@
 
  
  
- html {
+ html {f
      scroll-behavior: smooth
  }
 
- body {
+ body {  
+    
      margin: 0;
      color: var(--ink);
      background: var(--cream);
